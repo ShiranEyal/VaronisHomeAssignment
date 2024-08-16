@@ -10,14 +10,15 @@ ACCESS_TOKEN = os.getenv('GITHUB_TOKEN')
 REPO_NAME = os.getenv('REPO_NAME')
 REQ_REVIEWS = 1
 
-PullReqNeedConfig = "The default branch '{}' is not configured properly for pull request reviewers. Adding a default configuration."
-PullReqAlreadyConfigured = "The default branch '{}' is already protected with required reviews."
-PullReqSuccess = "Successfully protected the branch '{}' with required pull request reviews."
-PullReqFailure = "Failed to protect the branch with pull requests. Response: {}"
+PULL_REQ_NEED_CONFIG = "The default branch '{}' is not configured properly for pull request reviewers. Adding a default configuration."
+PULL_REQ_ALREADY_CONFIGURED = "The default branch '{}' is already protected with required reviews."
+PULL_REQ_SUCCESS = "Successfully protected the branch '{}' with required pull request reviews."
+PULL_REQ_FAILURE = "Failed to protect the branch with pull requests. Response: {}"
 
-ForcePushDisabledSuccess = "Successfully disabled force pushing for branch '{}'."
-ForcePushDisabledFailure = "Failed to update protection settings: {}"
-ForcePushDisabledFinished = "Finished removing force pushing from all protected branches."
+FORCE_PUSH_DISABLED_SUCCESS = "Successfully disabled force pushing for branch '{}'."
+FORCE_PUSH_DISABLED_FAILURE = "Failed to update protection settings: {}"
+FORCE_PUSH_DISABLED_FINISHED = "Finished removing force pushing from all protected branches."
+FETCHING_ERROR = "Error getting user or repository. Please configure the .env file with proper variables and try again."
 
 # Protection field strings
 REQUIRED_STATUS_CHECKS = "required_status_checks"
@@ -52,7 +53,7 @@ def ConfigurePullReqReviewers(repo, curr_user):
     # Check if default branch is missing a pull request reviewers configuration
     if not protection or not protection.required_pull_request_reviews or \
             protection.required_pull_request_reviews.required_approving_review_count == 0:
-        print(PullReqNeedConfig.format(default_branch.name))
+        print(PULL_REQ_NEED_CONFIG.format(default_branch.name))
         url = URL_P1 + curr_user.login + URL_P2 + repo.name + URL_P3 + default_branch.name + URL_P4
         headers = GetReqHeaders()
         # Get current protection settings
@@ -64,11 +65,11 @@ def ConfigurePullReqReviewers(repo, curr_user):
         # Make put request to update protection settings
         response = requests.put(url, headers=headers, data=json.dumps(updated_settings))
         if response.status_code == 200:
-            print(PullReqSuccess.format(default_branch.name))
+            print(PULL_REQ_SUCCESS.format(default_branch.name))
         else:
-            print(PullReqFailure.format(response.status_code))
+            print(PULL_REQ_FAILURE.format(response.status_code))
     else:
-        print(PullReqAlreadyConfigured.format(default_branch.name))
+        print(PULL_REQ_ALREADY_CONFIGURED.format(default_branch.name))
 
 # This function verifies that all branches in the repository that have some sort of protection rule have the option
 # to force push turned off.
@@ -86,12 +87,12 @@ def DisableForcePushing(repo, curr_user):
             # Make put request to update protection settings
             response = requests.put(url, headers=headers, data=json.dumps(updated_settings))
             if response.status_code == 200:
-                print(ForcePushDisabledSuccess.format(branch.name))
+                print(FORCE_PUSH_DISABLED_SUCCESS.format(branch.name))
             else:
-                print(ForcePushDisabledFailure.format(response.json()))
+                print(FORCE_PUSH_DISABLED_FAILURE.format(response.json()))
         except:
             continue
-    print(ForcePushDisabledFinished)
+    print(FORCE_PUSH_DISABLED_FINISHED)
 
 # Helper function to get header for requests
 def GetReqHeaders():
@@ -135,8 +136,11 @@ def GetBranchProtectionSettings(url, headers):
 
 
 if __name__ == "__main__":
-    g = Github(ACCESS_TOKEN)
-    curr_user = g.get_user()
-    repo = curr_user.get_repo(REPO_NAME)
-    ConfigurePullReqReviewers(repo, curr_user)
-    DisableForcePushing(repo, curr_user)
+    try:
+        g = Github(ACCESS_TOKEN)
+        curr_user = g.get_user()
+        repo = curr_user.get_repo(REPO_NAME)
+        ConfigurePullReqReviewers(repo, curr_user)
+        DisableForcePushing(repo, curr_user)
+    except Exception as e:
+        print(FETCHING_ERROR)
