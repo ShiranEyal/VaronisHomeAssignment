@@ -19,6 +19,11 @@ FORCE_PUSH_DISABLED_SUCCESS = "Successfully disabled force pushing for branch '{
 FORCE_PUSH_DISABLED_FAILURE = "Failed to update protection settings: {}"
 FORCE_PUSH_DISABLED_FINISHED = "Finished removing force pushing from all protected branches."
 FETCHING_ERROR = "Error getting user or repository. Please configure the .env file with proper variables and try again."
+REQ_HEADERS = {
+                "Authorization": f"token {ACCESS_TOKEN}",
+                "Accept": "application/vnd.github.v3+json",
+                "Content-Type": "application/json"
+            }
 
 # Protection field strings
 REQUIRED_STATUS_CHECKS = "required_status_checks"
@@ -36,10 +41,7 @@ STRICT = "strict"
 CONTEXTS = "contexts"
 ENABLED = "enabled"
 
-URL_P1 = "https://api.github.com/repos/"
-URL_P2 = "/"
-URL_P3 = "/branches/"
-URL_P4 = "/protection"
+URL = "https://api.github.com/repos/{}/{}/branches/{}/protection"
 
 # This function verifies that the repository`s default branch is configured properly for pull request reviewers.
 # If it is not we create a new protection ruleset for it.
@@ -54,8 +56,8 @@ def ConfigurePullReqReviewers(repo, curr_user):
     if not protection or not protection.required_pull_request_reviews or \
             protection.required_pull_request_reviews.required_approving_review_count == 0:
         print(PULL_REQ_NEED_CONFIG.format(default_branch.name))
-        url = URL_P1 + curr_user.login + URL_P2 + repo.name + URL_P3 + default_branch.name + URL_P4
-        headers = GetReqHeaders()
+        url = URL.format(curr_user.login, repo.name, default_branch.name)
+        headers = REQ_HEADERS
         # Get current protection settings
         updated_settings = GetBranchProtectionSettings(url, headers)
         updated_settings[REQUIRED_PULL_REQUEST_REVIEWS] = {
@@ -75,32 +77,25 @@ def ConfigurePullReqReviewers(repo, curr_user):
 # to force push turned off.
 def DisableForcePushing(repo, curr_user):
     for branch in repo.get_branches():
+        # Try to get protection. if failed then this is an unprotected branch and we can continue
         try:
-            # Try to get protection. if failed then this is an unprotected branch and we can continue
             protection = branch.get_protection()
-            url = URL_P1 + curr_user.login + URL_P2 + repo.name + URL_P3 + branch.name + URL_P4
-            headers = GetReqHeaders()
-            # Get current protection settings
-            updated_settings = GetBranchProtectionSettings(url, headers)
-            updated_settings[ALLOW_FORCE_PUSHES] = False
-
-            # Make put request to update protection settings
-            response = requests.put(url, headers=headers, data=json.dumps(updated_settings))
-            if response.status_code == 200:
-                print(FORCE_PUSH_DISABLED_SUCCESS.format(branch.name))
-            else:
-                print(FORCE_PUSH_DISABLED_FAILURE.format(response.json()))
         except:
             continue
+        url = URL.format(curr_user.login, repo.name, branch.name)
+        headers = REQ_HEADERS
+        # Get current protection settings
+        updated_settings = GetBranchProtectionSettings(url, headers)
+        updated_settings[ALLOW_FORCE_PUSHES] = False
+
+        # Make put request to update protection settings
+        response = requests.put(url, headers=headers, data=json.dumps(updated_settings))
+        if response.status_code == 200:
+            print(FORCE_PUSH_DISABLED_SUCCESS.format(branch.name))
+        else:
+            print(FORCE_PUSH_DISABLED_FAILURE.format(response.json()))
     print(FORCE_PUSH_DISABLED_FINISHED)
 
-# Helper function to get header for requests
-def GetReqHeaders():
-    return {
-                "Authorization": f"token {ACCESS_TOKEN}",
-                "Accept": "application/vnd.github.v3+json",
-                "Content-Type": "application/json"
-            }
 
 # Helper function to retrieve the protection settings of a branch using specified url and headers
 def GetBranchProtectionSettings(url, headers):
@@ -140,7 +135,9 @@ if __name__ == "__main__":
         g = Github(ACCESS_TOKEN)
         curr_user = g.get_user()
         repo = curr_user.get_repo(REPO_NAME)
-        ConfigurePullReqReviewers(repo, curr_user)
-        DisableForcePushing(repo, curr_user)
     except Exception as e:
         print(FETCHING_ERROR)
+        exit()
+    ConfigurePullReqReviewers(repo, curr_user)
+    DisableForcePushing(repo, curr_user)
+
