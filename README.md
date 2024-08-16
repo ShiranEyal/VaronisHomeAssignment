@@ -1,5 +1,5 @@
 # VeronisHomeAssignment
-*READ*
+*READ*<br>
 In order for the code to run propertly, a .env file ust be added to the project directory. The contents of the file should look like this:<br>
 GITHUB_TOKEN="your_github_token"<br>
 REPO_NAME="your_github_repo"<br>
