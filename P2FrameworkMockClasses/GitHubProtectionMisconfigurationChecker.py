@@ -1,5 +1,6 @@
 from P2FrameworkMockClasses.MisconfigurationChecker import MisconfigurationChecker
 
+# Example class of specific missconfiguration class inheriting from MisconfigurationChecker
 class GitHubProtectionMisconfigurationChecker (MisconfigurationChecker):
     def checkForMisconfiguration(self):
         # our code from p1 of the exercise for scanning for the misconfiguration would go here

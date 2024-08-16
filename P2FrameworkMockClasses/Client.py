@@ -1,3 +1,5 @@
+
+# class representing a client in our framework with a list of misconfigurations we need to check for them.
 class Client:
     def __init__(self, id, misconfigurations):
         # identifier
