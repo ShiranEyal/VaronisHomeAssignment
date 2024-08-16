@@ -29,7 +29,9 @@ the option "Require approvals", and using the dropdown list specify the number o
 Changing this configuration will result in each merge request with the default branch to be kept on hold until the specified number of
 approvals is met. <br>
 The project also contains a bonus script, that demonstrates the risk of how repositories without a reviewer ruleset are vulnerable to
-unwanted files and code addition into critical branches.
+unwanted files and code addition into critical branches. <br>
+The project contains a folder named "ScreenShots", which contain screenshots of the expected outputs of both the main and bonus scripts. The outputs vary
+depending on if a reviewer ruleset is already in place for the main branch.
 
 - Add a detailed description of how you would expand your scripts into a framework
 for monitoring and fixing many misconfigurations across multiple services from
@@ -55,4 +57,5 @@ because we do not know in advance how many misconfigurations and misconfiguratio
 database might cause problems.
 Regarding usage, our site can either keep tracking periodically for every client registered, or we can implement a login system where clients need to
 log in in order for our application to begin monitoring their data.
+
 
