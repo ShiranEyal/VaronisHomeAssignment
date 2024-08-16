@@ -105,9 +105,6 @@ def GetReqHeaders():
 def GetBranchProtectionSettings(url, headers):
     # Fetch current protection settings
     response = requests.get(url, headers=headers)
-    # if response.status_code != 200:
-    #     print(f"Failed to fetch protection settings: {response.json()}")
-    #     return
 
     protection_settings = response.json()
 
