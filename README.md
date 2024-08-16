@@ -46,6 +46,9 @@ a new class inheriting from this abstract class, and thus forced to implement th
 for a specific misconfiguration type  and could be implemented inside a class named GitHubProtectionMisconfigurationChecker, where we seperate the 
 code between checkForMisconfiguration(), where we check if the current repo is misconfigured regarding its protection, and handleFoundMisconfiguration(),
 where we fix the misconfiguration (this can be based on default settings and protocols we establish, or by instructions given to us by the user).
+For the database, we can use MongoDB, as it supports encryption which is crutial when storing important information, and would work well structurally,
+because we do not know in advance how many misconfigurations and misconfiguration types each client will bring, so storing the data in a table based
+database might cause problems.
 Regarding usage, our site can either keep tracking constantly for every client registered, or we can implement a login system where clients need to
 log in in order for our application to begin monitoring their data.
 
