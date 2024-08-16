@@ -47,11 +47,10 @@ URL = "https://api.github.com/repos/{}/{}/branches/{}/protection"
 # If it is not we create a new protection ruleset for it.
 def ConfigurePullReqReviewers(repo, curr_user):
     default_branch = repo.get_branch(repo.default_branch)
-    protection = None
     try:
         protection = default_branch.get_protection()
     except:
-        pass
+        protection = None
     # Check if default branch is missing a pull request reviewers configuration
     if not protection or not protection.required_pull_request_reviews or \
             protection.required_pull_request_reviews.required_approving_review_count == 0:
@@ -101,9 +100,13 @@ def DisableForcePushing(repo, curr_user):
 def GetBranchProtectionSettings(url, headers):
     # Fetch current protection settings
     response = requests.get(url, headers=headers)
-
     protection_settings = response.json()
+    updated_settings = UpdateSettingsFormat(protection_settings)
+    return updated_settings
 
+# Helper function to convert the protection settings returned from our get request to
+# the correct format for a put request
+def UpdateSettingsFormat(protection_settings):
     # Reconfigure required_status_checks field
     required_status_checks = protection_settings.get(REQUIRED_STATUS_CHECKS, None)
     if required_status_checks is not None:
