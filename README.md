@@ -1,10 +1,12 @@
 # VeronisHomeAssignment
-*READ*<br>
+__Please Read Carefully__ <br>
 In order for the code to run propertly, a .env file ust be added to the project directory. The contents of the file should look like this:<br>
 GITHUB_TOKEN="your_github_token"<br>
 REPO_NAME="your_github_repo"<br>
 The github token can be generated in the gitHub app under user settings -> developer settings -> Personal access token.
 REPO_NAME is the name of the repository for which you want to check and update the configurations.
+After configuring this file correctly, the script can be run by configuring your script path to the script location using your IDE.
+The bonus script can be run as well and will result in a different output depending on if the main branch is protected or not.
 
 
 *ANSWERS TO QUESTIONS*
